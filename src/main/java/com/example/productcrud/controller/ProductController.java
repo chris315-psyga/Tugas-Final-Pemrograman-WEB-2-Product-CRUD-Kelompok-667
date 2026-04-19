@@ -1,21 +1,32 @@
 package com.example.productcrud.controller;
 
+
 import com.example.productcrud.model.Category;
+import com.example.productcrud.model.User;
 import com.example.productcrud.model.Product;
+import com.example.productcrud.repository.CategoryRepository;
+import com.example.productcrud.repository.UserRepository;
+import com.example.productcrud.service.CategoryService;
+import org.springframework.security.core.Authentication;
 import com.example.productcrud.service.ProductService;
 import java.time.LocalDate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.util.List;
 
 @Controller
 public class ProductController {
 
     private final ProductService productService;
+    private final CategoryService categoryService;
+    private final UserRepository userRepository;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, CategoryService categoryService, UserRepository userRepository) {
         this.productService = productService;
+        this.categoryService = categoryService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/")
@@ -40,11 +51,16 @@ public class ProductController {
     }
 
     @GetMapping("/products/new")
-    public String showCreateForm(Model model) {
+    public String showCreateForm(Model model,Authentication authentication) {
         Product product = new Product();
         product.setCreatedAt(LocalDate.now());
         model.addAttribute("product", product);
-        model.addAttribute("categories", Category.values());
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        List<Category> categories = categoryService.findAllByUserId(user.getId());
+        model.addAttribute("categories", categories);
         return "product/form";
     }
 
@@ -56,11 +72,16 @@ public class ProductController {
     }
 
     @GetMapping("/products/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) {
+    public String showEditForm(@PathVariable Long id, Model model, Authentication authentication) {
         return productService.findById(id)
                 .map(product -> {
                     model.addAttribute("product", product);
-                    model.addAttribute("categories", Category.values());
+                    String username = authentication.getName();
+                    User user = userRepository.findByUsername(username)
+                            .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+                    List<Category> categories = categoryService.findAllByUserId(user.getId());
+                    model.addAttribute("categories", categories);
                     return "product/form";
                 })
                 .orElse("redirect:/products");

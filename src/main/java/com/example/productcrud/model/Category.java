@@ -1,18 +1,62 @@
 package com.example.productcrud.model;
 
-public enum Category {
-    ELEKTRONIK("Elektronik"),
-    BUKU("Buku"),
-    MAKANAN("Makanan"),
-    PAKAIAN("Pakaian");
+import jakarta.persistence.*;
 
-    private final String displayName;
+@Entity
+@Table(name = "categories")
+public class Category {
 
-    Category(String displayName) {
-        this.displayName = displayName;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private  Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(length = 500)
+    private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    public Category(){
+    }
+        public Category(String name, String description, User user){
+            this.name = name;
+            this.description = description;
+            this.user = user;
+        }
+
+    public Long getId() {
+        return id;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
