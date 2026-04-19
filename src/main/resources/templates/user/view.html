@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: header}">
+</head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3>Profil Gua Nih</h3>
+                </div>
+                <div class="card-body text-center">
+
+                    <img th:src="${currentUser.profileImageUrl ?: 'https://via.placeholder.com/150'}"
+                         class="rounded-circle mb-3"
+                         alt="Profile Image"
+                         style="width: 150px; height: 150px; object-fit: cover;">
+
+                    <h4 class="mb-3" th:text="${currentUser.fullName ?: user.username}">Nama User</h4>
+
+                    <div class="row text-start">
+                        <div class="col-md-4 font-weight-bold">Username:</div>
+                        <div class="col-md-8" th:text="${currentUser.username}">-</div>
+
+                        <div class="col-md-4 font-weight-bold">Email:</div>
+                        <div class="col-md-8" th:text="${currentUser.email ?: '-'}">-</div>
+
+                        <div class="col-md-4 font-weight-bold">No. HP:</div>
+                        <div class="col-md-8" th:text="${currentUser.phoneNumber ?: '-'}">-</div>
+
+                        <div class="col-md-4 font-weight-bold">Alamat:</div>
+                        <div class="col-md-8" th:text="${currentUser.address ?: '-'}">-</div>
+
+                        <div class="col-md-4 font-weight-bold">Bio:</div>
+                        <div class="col-md-8" th:text="${currentUser.bio ?: '-'}">-</div>
+                    </div>
+
+                    <div class="mt-4">
+                        <a th:href="@{/profile/edit}" class="btn btn-warning">Edit Profil</a>
+                        <a th:href="@{/products}" class="btn btn-secondary">Kembali ke Produk</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

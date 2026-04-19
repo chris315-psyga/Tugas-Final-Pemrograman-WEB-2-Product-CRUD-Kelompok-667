@@ -1,7 +1,7 @@
 package com.example.productcrud.model;
 
 import java.time.LocalDate;
-
+import com.example.productcrud.model.User;
 import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -19,6 +19,10 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     private long price;
     private int stock;
@@ -39,6 +43,7 @@ public class Product {
         this.id = id;
         this.name = name;
         this.category = category;
+        this.user = user;
         this.price = price;
         this.stock = stock;
         this.description = description;
@@ -108,5 +113,13 @@ public class Product {
 
     public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

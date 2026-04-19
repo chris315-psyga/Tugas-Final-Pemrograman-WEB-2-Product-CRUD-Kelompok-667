@@ -35,8 +35,12 @@ public class ProductController {
     }
 
     @GetMapping("/products")
-    public String listProducts(Model model) {
-        model.addAttribute("products", productService.findAll());
+    public String listProducts(Model model, Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                        .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+        List<Product> products = productService.findAllByUserId(user.getId());
+        model.addAttribute("products", products);
         return "product/list";
     }
 
@@ -65,7 +69,12 @@ public class ProductController {
     }
 
     @PostMapping("/products/save")
-    public String saveProduct(@ModelAttribute Product product, RedirectAttributes redirectAttributes) {
+    public String saveProduct(@ModelAttribute Product product, Authentication authentication, RedirectAttributes redirectAttributes) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                        .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+        product.setUser(user);
+
         productService.save(product);
         redirectAttributes.addFlashAttribute("successMessage", "Produk berhasil disimpan!");
         return "redirect:/products";
