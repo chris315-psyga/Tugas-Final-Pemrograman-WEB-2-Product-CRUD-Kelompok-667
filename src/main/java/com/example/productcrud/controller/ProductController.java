@@ -34,13 +34,68 @@ public class ProductController {
         return "redirect:/products";
     }
 
+    // ==================== LIST PRODUCTS DENGAN SEARCH & FILTER ====================
+
     @GetMapping("/products")
-    public String listProducts(Model model, Authentication authentication) {
+    public String listProducts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(value = "category", required = false) String categoryId,
+            Model model,
+            Authentication authentication) {
+
         String username = authentication.getName();
         User user = userRepository.findByUsername(username)
-                        .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
-        List<Product> products = productService.findAllByUserId(user.getId());
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        List<Product> products;
+
+        // Konversi categoryId dari String ke Long (aman dari error)
+        Long categoryIdLong = null;
+        if (categoryId != null && !categoryId.trim().isEmpty() && !categoryId.equals("null")) {
+            try {
+                categoryIdLong = Long.parseLong(categoryId.trim());
+            } catch (NumberFormatException e) {
+                // Jika bukan angka valid, set ke null
+                categoryIdLong = null;
+            }
+        }
+
+        // Jika ada parameter search atau filter, gunakan query khusus
+        boolean hasKeyword = (keyword != null && !keyword.trim().isEmpty());
+        boolean hasCategory = (categoryIdLong != null);
+
+        if (hasKeyword || hasCategory) {
+            products = productService.findByKeywordAndCategory(
+                    hasKeyword ? keyword.trim() : null,
+                    categoryIdLong,
+                    user.getId()
+            );
+        } else {
+            // Tampilkan semua produk user
+            products = productService.findAllByUserId(user.getId());
+        }
+
+        // Ambil semua kategori untuk dropdown filter
+        List<Category> categories = categoryService.findAllByUserId(user.getId());
+
+        // Cari nama kategori yang dipilih (untuk ditampilkan di info)
+        String selectedCategoryName = null;
+        if (categoryIdLong != null) {
+            for (Category cat : categories) {
+                if (cat.getId().equals(categoryIdLong)) {
+                    selectedCategoryName = cat.getName();
+                    break;
+                }
+            }
+        }
+
+        // Kirim data ke view
         model.addAttribute("products", products);
+        model.addAttribute("categories", categories);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedCategory", categoryIdLong);
+        model.addAttribute("selectedCategoryName", selectedCategoryName);
+
         return "product/list";
     }
 
@@ -55,16 +110,18 @@ public class ProductController {
     }
 
     @GetMapping("/products/new")
-    public String showCreateForm(Model model,Authentication authentication) {
+    public String showCreateForm(Model model, Authentication authentication) {
         Product product = new Product();
         product.setCreatedAt(LocalDate.now());
         model.addAttribute("product", product);
+
         String username = authentication.getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
 
         List<Category> categories = categoryService.findAllByUserId(user.getId());
         model.addAttribute("categories", categories);
+
         return "product/form";
     }
 
@@ -72,7 +129,7 @@ public class ProductController {
     public String saveProduct(@ModelAttribute Product product, Authentication authentication, RedirectAttributes redirectAttributes) {
         String username = authentication.getName();
         User user = userRepository.findByUsername(username)
-                        .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
         product.setUser(user);
 
         productService.save(product);
@@ -85,12 +142,14 @@ public class ProductController {
         return productService.findById(id)
                 .map(product -> {
                     model.addAttribute("product", product);
+
                     String username = authentication.getName();
                     User user = userRepository.findByUsername(username)
                             .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
 
                     List<Category> categories = categoryService.findAllByUserId(user.getId());
                     model.addAttribute("categories", categories);
+
                     return "product/form";
                 })
                 .orElse("redirect:/products");

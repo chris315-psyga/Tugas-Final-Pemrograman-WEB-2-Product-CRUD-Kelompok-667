@@ -1,5 +1,6 @@
 package com.example.productcrud.controller;
 
+import com.example.productcrud.dto.ChangePasswordRequest;
 import com.example.productcrud.model.User;
 import com.example.productcrud.repository.UserRepository;
 import com.example.productcrud.service.UserService;
@@ -48,7 +49,7 @@ public class UserController {
 
         String username = authentication.getName();
         User existingUser = userRepository.findByUsername(username)
-                        .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
 
         String newPassword = userFromForm.getPassword();
 
@@ -63,6 +64,65 @@ public class UserController {
         userService.save(userFromForm);
 
         redirectAttributes.addFlashAttribute("successMessage", "Profil berhasil diperbarui");
+        return "redirect:/profile";
+    }
+
+    // ==================== CHANGE PASSWORD ====================
+
+    @GetMapping("/profile/change-password")
+    public String showChangePasswordForm(Model model) {
+        model.addAttribute("changePasswordRequest", new ChangePasswordRequest());
+        return "user/change-password";
+    }
+
+    @PostMapping("/profile/change-password")
+    public String processChangePassword(@ModelAttribute ChangePasswordRequest request,
+                                        Authentication authentication,
+                                        RedirectAttributes redirectAttributes) {
+
+        String username = authentication.getName();
+        User existingUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        // Validasi: field tidak boleh kosong
+        if (request.getOldPassword() == null || request.getOldPassword().trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Password lama harus diisi");
+            return "redirect:/profile/change-password";
+        }
+
+        if (request.getNewPassword() == null || request.getNewPassword().trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Password baru harus diisi");
+            return "redirect:/profile/change-password";
+        }
+
+        if (request.getConfirmPassword() == null || request.getConfirmPassword().trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Konfirmasi password baru harus diisi");
+            return "redirect:/profile/change-password";
+        }
+
+        // Validasi: password lama sesuai
+        if (!passwordEncoder.matches(request.getOldPassword(), existingUser.getPassword())) {
+            redirectAttributes.addFlashAttribute("error", "Password lama salah");
+            return "redirect:/profile/change-password";
+        }
+
+        // Validasi: password baru sama dengan konfirmasi
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            redirectAttributes.addFlashAttribute("error", "Password baru dan konfirmasi password tidak sama");
+            return "redirect:/profile/change-password";
+        }
+
+        // Validasi: password baru tidak boleh sama dengan password lama
+        if (passwordEncoder.matches(request.getNewPassword(), existingUser.getPassword())) {
+            redirectAttributes.addFlashAttribute("error", "Password baru tidak boleh sama dengan password lama");
+            return "redirect:/profile/change-password";
+        }
+
+        // Update password dengan encoding BCrypt
+        existingUser.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userService.save(existingUser);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Password berhasil diubah!");
         return "redirect:/profile";
     }
 }

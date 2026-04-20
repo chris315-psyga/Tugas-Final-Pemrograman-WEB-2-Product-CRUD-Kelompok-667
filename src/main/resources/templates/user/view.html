@@ -19,7 +19,7 @@
                          alt="Profile Image"
                          style="width: 150px; height: 150px; object-fit: cover;">
 
-                    <h4 class="mb-3" th:text="${currentUser.fullName ?: user.username}">Nama User</h4>
+                    <h4 class="mb-3" th:text="${currentUser.fullName ?: currentUser.username}">Nama User</h4>
 
                     <div class="row text-start">
                         <div class="col-md-4 font-weight-bold">Username:</div>
@@ -40,6 +40,7 @@
 
                     <div class="mt-4">
                         <a th:href="@{/profile/edit}" class="btn btn-warning">Edit Profil</a>
+                        <a th:href="@{/profile/change-password}" class="btn btn-info">Ganti Password</a>
                         <a th:href="@{/products}" class="btn btn-secondary">Kembali ke Produk</a>
                     </div>
                 </div>

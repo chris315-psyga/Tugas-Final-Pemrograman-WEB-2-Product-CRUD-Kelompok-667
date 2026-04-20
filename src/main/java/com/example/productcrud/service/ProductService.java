@@ -1,12 +1,10 @@
 package com.example.productcrud.service;
 
-import com.example.productcrud.model.Category;
 import com.example.productcrud.model.Product;
 import com.example.productcrud.repository.ProductRepository;
 import com.example.productcrud.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +29,12 @@ public class ProductService {
 
     public List<Product> findAllByUserId(Long userId){
         return productRepository.findByUserId(userId);
+    }
+
+    // ==================== SEARCH & FILTER METHOD ====================
+
+    public List<Product> findByKeywordAndCategory(String keyword, Long categoryId, Long userId){
+        return productRepository.findByKeywordAndCategory(keyword, categoryId, userId);
     }
 
     public Optional<Product> findById(Long id) {
