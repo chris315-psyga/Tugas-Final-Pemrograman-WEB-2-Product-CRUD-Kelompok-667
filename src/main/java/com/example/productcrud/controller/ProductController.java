@@ -1,38 +1,18 @@
 package com.example.productcrud.controller;
 
-
-import com.example.productcrud.model.Category;
-import com.example.productcrud.model.User;
 import com.example.productcrud.model.Product;
-import com.example.productcrud.repository.CategoryRepository;
-import com.example.productcrud.repository.UserRepository;
-import com.example.productcrud.service.CategoryService;
-import org.springframework.security.core.Authentication;
 import com.example.productcrud.service.ProductService;
-import java.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.util.List;
 
 @Controller
 public class ProductController {
 
-    private final ProductService productService;
-    private final CategoryService categoryService;
-    private final UserRepository userRepository;
-
-    public ProductController(ProductService productService, CategoryService categoryService, UserRepository userRepository) {
-        this.productService = productService;
-        this.categoryService = categoryService;
-        this.userRepository = userRepository;
-    }
-
-    @GetMapping("/")
-    public String index() {
-        return "redirect:/products";
-    }
+    @Autowired
+    private ProductService productService;
 
     // ==================== LIST PRODUCTS DENGAN SEARCH & FILTER ====================
 
@@ -122,13 +102,61 @@ public class ProductController {
         List<Category> categories = categoryService.findAllByUserId(user.getId());
         model.addAttribute("categories", categories);
 
+    /**
+     * ⭐ METHOD UTAMA: Menampilkan daftar produk dengan PAGINATION
+     *
+     * URL Pattern: /products?page=0&keyword=&categoryId=&active=
+     */
+    @GetMapping("/products")
+    public String listProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Boolean active,
+            Model model) {
+
+        // 1. Ambil data produk dari service (sudah include pagination)
+        Page<Product> productPage = productService.getProducts(page, keyword, categoryId, active);
+
+        // 2. Tambahkan data produk ke model
+        model.addAttribute("products", productPage.getContent());
+
+        // 3. Tambahkan metadata PAGINATION ke model
+        model.addAttribute("currentPage", productPage.getNumber());           // Halaman saat ini (0-indexed)
+        model.addAttribute("totalPages", productPage.getTotalPages());       // Total jumlah halaman
+        model.addAttribute("totalItems", productPage.getTotalElements());   // Total jumlah item
+
+        // 4. Tambahkan parameter filter (untuk maintain state di URL pagination)
+        model.addAttribute("keyword", keyword != null ? keyword : "");
+        model.addAttribute("categoryId", categoryId);
+        model.addAttribute("active", active);
+
+        // 5. Hitung "Showing X to Y of Z entries"
+        int startItem = page * 10 + 1;  // Item pertama di halaman ini
+        int endItem = Math.min((page + 1) * 10, (int) productPage.getTotalElements());  // Item terakhir
+
+        model.addAttribute("startItem", startItem);
+        model.addAttribute("endItem", endItem);
+
+        // 6. Return nama template Thymeleaf
+        return "product/list";
+    }
+
+    /**
+     * Method untuk menampilkan form create produk
+     */
+    @GetMapping("/products/create")
+    public String showCreateForm(Model model) {
+        model.addAttribute("product", new Product());
         return "product/form";
     }
 
+    /**
+     * Method untuk menyimpan produk baru
+     */
     @PostMapping("/products/save")
     public String saveProduct(@ModelAttribute Product product, Authentication authentication, RedirectAttributes redirectAttributes) {
         String username = authentication.getName();
-        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
         product.setUser(user);
 
@@ -153,12 +181,31 @@ public class ProductController {
                     return "product/form";
                 })
                 .orElse("redirect:/products");
+    public String saveProduct(@ModelAttribute Product product) {
+        // Logic save product...
     }
 
-    @PostMapping("/products/{id}/delete")
-    public String deleteProduct(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        productService.deleteById(id);
-        redirectAttributes.addFlashAttribute("successMessage", "Produk berhasil dihapus!");
+    /**
+     * Method untuk menampilkan form edit produk
+     */
+    @GetMapping("/products/edit/{id}")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        // Logic load product by id...
+        return "product/form";
+    }
+
+     * Method untuk update produk
+     */
+    @PostMapping("/products/update/{id}")
+    public String updateProduct(@PathVariable Long id, @ModelAttribute Product product) {
+        // Logic update product...
+        return "redirect:/products";
+    }
+
+    /**
+     * Method untuk delete produk
+     */
+        // Logic delete product...
         return "redirect:/products";
     }
 }

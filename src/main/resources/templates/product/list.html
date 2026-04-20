@@ -1,6 +1,30 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: header}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Produk - Pagination</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .pagination { display: flex; gap: 5px; list-style: none; padding: 0; justify-content: center; margin-top: 20px; }
+        .pagination a, .pagination span {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            color: #333;
+        }
+        .pagination a:hover { background-color: #eee; }
+        .pagination .active {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+            font-weight: bold;
+        }
+        .info { margin: 15px 0; color: #666; }
+    </style>
 </head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
@@ -166,5 +190,103 @@
 </div>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<h1>📦 Daftar Produk</h1>
+
+<!-- ==================== INFO TOTAL DATA ==================== -->
+<div class="info">
+    <strong>Showing <span th:text="${startItem}">1</span>
+        to <span th:text="${endItem}">10</span> of
+        <span th:text="${totalItems}">100</span> entries</strong>
+</div>
+
+<!-- ==================== SEARCH & FILTER FORM ==================== -->
+<form th:action="@{/products}" method="get" style="margin-bottom: 20px;">
+    <input type="text" name="keyword" th:value="${keyword}" placeholder="Cari produk...">
+    <select name="categoryId">
+        <option value="">-- Semua Kategori --</option>
+        <option value="1" th:selected="${categoryId == 1}">Elektronik</option>
+        <option value="2" th:selected="${categoryId == 2}">Fashion</option>
+        <option value="3" th:selected="${categoryId == 3}">Makanan</option>
+    </select>
+    <select name="active">
+        <option value="">-- Status --</option>
+        <option value="true" th:selected="${active == true}">Aktif</option>
+        <option value="false" th:selected="${active == false}">Non-Aktif</option>
+    </select>
+    <button type="submit">Filter</button>
+    <a th:href="@{/products}">Reset</a>
+</form>
+
+<!-- ==================== TABLE PRODUK ==================== -->
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nama Produk</th>
+        <th>Kategori</th>
+        <th>Harga</th>
+        <th>Stok</th>
+        <th>Status</th>
+        <th>Tanggal Dibuat</th>
+        <th>Aksi</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="product : ${products}">
+        <td th:text="${product.id}">1</td>
+        <td th:text="${product.name}">Nama Produk</td>
+        <td th:text="${product.category != null ? product.category.name : '-'}">Kategori</td>
+        <td th:text="${product.price}">10000</td>
+        <td th:text="${product.stock}">50</td>
+        <td th:text="${product.active ? 'Aktif' : 'Non-Aktif'}">Aktif</td>
+        <td th:text="${product.createdAt}">2024-01-15</td>
+        <td>
+            <a th:href="@{'/products/edit/' + ${product.id}}">Edit</a>
+            <a th:href="@{'/products/delete/' + ${product.id}}"
+               onclick="return confirm('Yakin hapus?')">Delete</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- ==================== ⭐ PAGINATION CONTROLS ⭐ ==================== -->
+<nav>
+    <ul class="pagination">
+
+        <!-- PREVIOUS BUTTON -->
+        <li th:if="${currentPage > 0}">
+            <a th:href="@{/products(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, active=${active})}">
+                « Previous
+            </a>
+        </li>
+        <li th:unless="${currentPage > 0}">
+            <span style="color: #ccc;">« Previous</span>
+        </li>
+
+        <!-- PAGE NUMBERS -->
+        <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <li th:if="${i != currentPage}">
+                <a th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, active=${active})}"
+                   th:text="${i + 1}">1</a>
+            </li>
+            <li th:if="${i == currentPage}">
+                <span class="active" th:text="${i + 1}">1</span>
+            </li>
+        </th:block>
+
+        <!-- NEXT BUTTON -->
+        <li th:if="${currentPage < totalPages - 1}">
+            <a th:href="@{/products(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, active=${active})}">
+                Next »
+            </a>
+        </li>
+        <li th:unless="${currentPage < totalPages - 1}">
+            <span style="color: #ccc;">Next »</span>
+        </li>
+
+    </ul>
+</nav>
+
 </body>
 </html>
