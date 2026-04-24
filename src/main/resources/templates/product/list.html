@@ -1,30 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Produk - Pagination</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .pagination { display: flex; gap: 5px; list-style: none; padding: 0; justify-content: center; margin-top: 20px; }
-        .pagination a, .pagination span {
-            padding: 8px 15px;
-            border: 1px solid #ddd;
-            text-decoration: none;
-            color: #333;
-        }
-        .pagination a:hover { background-color: #eee; }
-        .pagination .active {
-            background-color: #2563eb;
-            color: white;
-            border-color: #2563eb;
-            font-weight: bold;
-        }
-        .info { margin: 15px 0; color: #666; }
-    </style>
+<head th:replace="~{fragments/layout :: header}">
 </head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
@@ -32,94 +8,45 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Daftar Produk</h2>
-        <a th:href="@{/products/new}" class="btn btn-success">
-            + Tambah Produk Baru
-        </a>
+        <a th:href="@{/products/new}" class="btn btn-success">+ Tambah Produk Baru</a>
     </div>
 
-    <!-- Flash Messages -->
     <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
         <span th:text="${successMessage}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <span th:text="${errorMessage}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
 
-    <!-- ==================== SEARCH & FILTER FORM ==================== -->
+    <!-- SEARCH & FILTER FORM -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <form th:action="@{/products}" method="get" class="row g-3 align-items-end">
-
-                <!-- Input Pencarian Nama Produk -->
                 <div class="col-md-5">
-                    <label for="keyword" class="form-label fw-bold">
-                        🔍 Cari Produk
-                    </label>
-                    <input type="text"
-                           class="form-control"
-                           id="keyword"
-                           name="keyword"
-                           th:value="${keyword}"
-                           placeholder="Ketik nama produk...">
+                    <label for="keyword" class="form-label fw-bold">🔍 Cari Produk</label>
+                    <input type="text" class="form-control" id="keyword" name="keyword" th:value="${keyword}" placeholder="Ketik nama produk...">
                 </div>
-
-                <!-- Dropdown Filter Kategori -->
                 <div class="col-md-5">
-                    <label for="category" class="form-label fw-bold">
-                        📁 Filter Kategori
-                    </label>
-                    <select class="form-select" id="category" name="category">
-                        <option value="" th:selected="${selectedCategory == null}">-- Semua Kategori --</option>
-                        <option th:each="cat : ${categories}"
-                                th:value="${cat.id}"
-                                th:text="${cat.name}"
-                                th:selected="${selectedCategory != null and cat.id == selectedCategory}">
-                        </option>
+                    <label for="category" class="form-label fw-bold">📁 Filter Kategori</label>
+                    <select class="form-select" id="category" name="categoryId">
+                        <option value="">-- Semua Kategori --</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}" th:selected="${categoryId != null and cat.id == categoryId}"></option>
                     </select>
                 </div>
-
-                <!-- Tombol Cari & Reset -->
-                <div class="col-md-2">
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            🔍 Cari
-                        </button>
-                        <a th:href="@{/products}" class="btn btn-outline-secondary btn-sm">
-                            ↺ Reset
-                        </a>
-                    </div>
+                <div class="col-md-2 d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">🔍 Cari</button>
+                    <a th:href="@{/products}" class="btn btn-outline-secondary btn-sm">↺ Reset</a>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Info Status Pencarian - DIPERBAIKI TIDAK PAKAI SELECTION YANG ERROR -->
-    <th:block th:if="${(keyword != null and !keyword.isEmpty()) or selectedCategory != null}">
-        <div class="alert alert-info d-flex justify-content-between align-items-center" role="alert">
-            <div>
-                <strong>Hasil Pencarian:</strong>
-                <th:block th:if="${keyword != null and !keyword.isEmpty()}">
-                    Keyword: "<span th:text="${keyword}"></span>"
-                </th:block>
-                <th:block th:if="${selectedCategoryName != null}">
-                    <th:block th:if="${keyword != null and !keyword.isEmpty()}"> | </th:block>
-                    Kategori: "<span th:text="${selectedCategoryName}"></span>"
-                </th:block>
-            </div>
-            <span class="badge bg-primary">
-                    <span th:text="${#lists.size(products)}">0</span> produk ditemukan
-                </span>
-        </div>
-    </th:block>
+    <!-- INFO TOTAL DATA -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="text-muted mb-0">
+            Showing <strong th:text="${startItem}">1</strong> to <strong th:text="${endItem}">10</strong> of <strong th:text="${totalItems}">0</strong> entries
+        </p>
+    </div>
 
-    <!-- Product Count -->
-    <p class="text-muted" th:unless="${(keyword != null and !keyword.isEmpty()) or selectedCategory != null}">
-        Total produk: <strong th:text="${#lists.size(products)}">0</strong>
-    </p>
-
-    <!-- Product Table -->
+    <!-- PRODUCT TABLE -->
     <div th:if="${!#lists.isEmpty(products)}">
         <table class="table table-striped table-hover">
             <thead class="table-dark">
@@ -135,7 +62,7 @@
             </thead>
             <tbody>
             <tr th:each="product, iterStat : ${products}">
-                <td th:text="${iterStat.index + 1}">1</td>
+                <td th:text="${currentPage * 10 + iterStat.index + 1}">1</td>
                 <td th:text="${product.name}">Nama Produk</td>
                 <td th:text="${product.category?.name}">Kategori</td>
                 <td th:text="${'Rp ' + #numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA')}">Rp 0</td>
@@ -145,148 +72,43 @@
                     <span th:unless="${product.active}" class="badge bg-danger">Tidak Aktif</span>
                 </td>
                 <td>
-                    <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-info btn-sm">Detail</a>
                     <a th:href="@{/products/{id}/edit(id=${product.id})}" class="btn btn-warning btn-sm">Edit</a>
-                    <form th:action="@{/products/{id}/delete(id=${product.id})}" method="post" style="display:inline;"
-                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?');">
+                    <form th:action="@{/products/{id}/delete(id=${product.id})}" method="post" style="display:inline;" onsubmit="return confirm('Yakin hapus?');">
                         <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
                     </form>
                 </td>
             </tr>
             </tbody>
         </table>
+
+        <!-- PAGINATION CONTROLS -->
+        <nav>
+            <ul class="pagination justify-content-center">
+                <!-- Previous Button -->
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/products(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId})}">Previous</a>
+                </li>
+
+                <!-- Page Numbers -->
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId})}" th:text="${i + 1}">1</a>
+                </li>
+
+                <!-- Next Button -->
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/products(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId})}">Next</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 
-    <!-- Empty State dengan Pesan Sesuai Konteks -->
+    <!-- EMPTY STATE -->
     <div th:if="${#lists.isEmpty(products)}" class="text-center py-5">
-        <div class="mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 16 16" class="text-muted">
-                <path d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2zm.5 2a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0 3a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0 3a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11z"/>
-            </svg>
-        </div>
-
-        <!-- Pesan berbeda tergantung konteks -->
-        <th:block th:if="${(keyword != null and !keyword.isEmpty()) or selectedCategory != null}">
-            <p class="text-muted fs-5 mb-2">😕 Tidak ada produk yang ditemukan</p>
-            <p class="text-muted">
-                Tidak ada produk dengan kriteria pencarian tersebut.
-                <br>Coba ubah kata kunci atau filter kategori.
-            </p>
-            <a th:href="@{/products}" class="btn btn-outline-primary mt-2">
-                ↺ Reset Pencarian
-            </a>
-        </th:block>
-
-        <th:block th:unless="${(keyword != null and !keyword.isEmpty()) or selectedCategory != null}">
-            <p class="text-muted fs-5 mb-2">📦 Belum ada produk</p>
-            <p class="text-muted">
-                Mulai tambahkan produk pertama Anda!
-            </p>
-            <a th:href="@{/products/new}" class="btn btn-primary mt-2">
-                + Tambah Produk Pertama
-            </a>
-        </th:block>
+        <p class="text-muted fs-5 mb-2">📦 Tidak ada produk ditemukan</p>
+        <a th:href="@{/products/new}" class="btn btn-primary mt-2">+ Tambah Produk Pertama</a>
     </div>
 </div>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
-
-<h1>📦 Daftar Produk</h1>
-
-<!-- ==================== INFO TOTAL DATA ==================== -->
-<div class="info">
-    <strong>Showing <span th:text="${startItem}">1</span>
-        to <span th:text="${endItem}">10</span> of
-        <span th:text="${totalItems}">100</span> entries</strong>
-</div>
-
-<!-- ==================== SEARCH & FILTER FORM ==================== -->
-<form th:action="@{/products}" method="get" style="margin-bottom: 20px;">
-    <input type="text" name="keyword" th:value="${keyword}" placeholder="Cari produk...">
-    <select name="categoryId">
-        <option value="">-- Semua Kategori --</option>
-        <option value="1" th:selected="${categoryId == 1}">Elektronik</option>
-        <option value="2" th:selected="${categoryId == 2}">Fashion</option>
-        <option value="3" th:selected="${categoryId == 3}">Makanan</option>
-    </select>
-    <select name="active">
-        <option value="">-- Status --</option>
-        <option value="true" th:selected="${active == true}">Aktif</option>
-        <option value="false" th:selected="${active == false}">Non-Aktif</option>
-    </select>
-    <button type="submit">Filter</button>
-    <a th:href="@{/products}">Reset</a>
-</form>
-
-<!-- ==================== TABLE PRODUK ==================== -->
-<table>
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Nama Produk</th>
-        <th>Kategori</th>
-        <th>Harga</th>
-        <th>Stok</th>
-        <th>Status</th>
-        <th>Tanggal Dibuat</th>
-        <th>Aksi</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="product : ${products}">
-        <td th:text="${product.id}">1</td>
-        <td th:text="${product.name}">Nama Produk</td>
-        <td th:text="${product.category != null ? product.category.name : '-'}">Kategori</td>
-        <td th:text="${product.price}">10000</td>
-        <td th:text="${product.stock}">50</td>
-        <td th:text="${product.active ? 'Aktif' : 'Non-Aktif'}">Aktif</td>
-        <td th:text="${product.createdAt}">2024-01-15</td>
-        <td>
-            <a th:href="@{'/products/edit/' + ${product.id}}">Edit</a>
-            <a th:href="@{'/products/delete/' + ${product.id}}"
-               onclick="return confirm('Yakin hapus?')">Delete</a>
-        </td>
-    </tr>
-    </tbody>
-</table>
-
-<!-- ==================== ⭐ PAGINATION CONTROLS ⭐ ==================== -->
-<nav>
-    <ul class="pagination">
-
-        <!-- PREVIOUS BUTTON -->
-        <li th:if="${currentPage > 0}">
-            <a th:href="@{/products(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, active=${active})}">
-                « Previous
-            </a>
-        </li>
-        <li th:unless="${currentPage > 0}">
-            <span style="color: #ccc;">« Previous</span>
-        </li>
-
-        <!-- PAGE NUMBERS -->
-        <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-            <li th:if="${i != currentPage}">
-                <a th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, active=${active})}"
-                   th:text="${i + 1}">1</a>
-            </li>
-            <li th:if="${i == currentPage}">
-                <span class="active" th:text="${i + 1}">1</span>
-            </li>
-        </th:block>
-
-        <!-- NEXT BUTTON -->
-        <li th:if="${currentPage < totalPages - 1}">
-            <a th:href="@{/products(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, active=${active})}">
-                Next »
-            </a>
-        </li>
-        <li th:unless="${currentPage < totalPages - 1}">
-            <span style="color: #ccc;">Next »</span>
-        </li>
-
-    </ul>
-</nav>
-
 </body>
 </html>

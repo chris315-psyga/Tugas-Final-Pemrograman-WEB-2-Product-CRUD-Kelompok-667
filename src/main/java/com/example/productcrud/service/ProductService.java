@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,49 +22,22 @@ public class ProductService {
 
     // ⭐ KONSTANTA: 10 PRODUK PER HALAMAN (sesuai requirement!)
     private static final int PAGE_SIZE = 10;
-
-    /**
-     * Method utama untuk mendapatkan produk dengan pagination
-     *
-     * @param page Nomor halaman (dimulai dari 0)
-     * @param keyword Kata kunci pencarian (opsional)
-     * @param categoryId ID kategori untuk filter (opsional)
-     * @param active Status aktif produk (opsional)
-     * @return Page<Product> berisi data dan metadata pagination
-     */
-    public Page<Product> getProducts(int page, String keyword, Long categoryId, Boolean active) {
-
-        // Buat objek Pageable dengan ukuran 10 per halaman
+    public Page<Product> getProducts(int page, String keyword, Long categoryId, Long userId) {
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
 
-        // Cek apakah ada parameter filter
         boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
         boolean hasCategory = categoryId != null;
-        boolean hasActiveFilter = active != null;
 
-        // Jika ada filter, gunakan query combined
-        if (hasKeyword || hasCategory || hasActiveFilter) {
+        if (hasKeyword || hasCategory) {
             return productRepository.findWithFilters(
+                    userId,
                     hasKeyword ? keyword.trim() : null,
                     categoryId,
-                    active,
                     pageable
             );
         }
 
-        // Default: ambil semua tanpa filter
-        return productRepository.findAll(pageable);
-    }
-
-    /**
-     * Hitung total semua produk (untuk info "Showing X to Y of Z entries")
-     */
-    public long getTotalProducts() {
-        return productRepository.count();
-    }
-
-    public List<Product> findAllByUserId(Long userId){
-        return productRepository.findByUserId(userId);
+        return productRepository.findByUserId(userId, pageable);
     }
 
     // ==================== SEARCH & FILTER METHOD ====================
@@ -81,5 +56,31 @@ public class ProductService {
 
     public void deleteById(Long id) {
         productRepository.deleteById(id);
+    }
+
+    //Dashboard
+
+    public Long countByUserId(Long userId) {
+        return productRepository.countByUserId(userId);
+    }
+
+    public Long sumInventoryValueByUserId(Long userId) {
+        return productRepository.sumInventoryValueByUserId(userId);
+    }
+
+    public Long countActiveByUserId(Long userId) {
+        return productRepository.countActiveByUserId(userId);
+    }
+
+    public Long countInactiveByUserId(Long userId) {
+        return productRepository.countInactiveByUserId(userId);
+    }
+
+    public List<Object[]> countProductsPerCategoryByUserId(Long userId) {
+        return productRepository.countProductsPerCategoryByUserId(userId);
+    }
+
+    public List<Product> findLowStockByUserId(Long userId) {
+        return productRepository.findLowStockByUserId(userId);
     }
 }
