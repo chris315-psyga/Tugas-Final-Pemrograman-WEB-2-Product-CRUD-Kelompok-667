@@ -1,26 +1,26 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: header}">
-</head>
+<head th:replace="~{fragments/layout :: header}"></head>
 <body>
-    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container">
-        <div class="row justify-content-center mt-5">
-            <div class="col-md-8 text-center">
-                <h1 class="display-4 mb-4">Selamat Datang di Product CRUD</h1>
-                <p class="lead mb-4">
-                    Aplikasi manajemen produk sederhana untuk praktikum JPA Fundamentals.
-                    Saat ini data disimpan di dalam memori (ArrayList). Pada praktikum berikutnya,
-                    Anda akan menambahkan JPA untuk menyimpan data ke database.
-                </p>
-                <a th:href="@{/products}" class="btn btn-primary btn-lg">
-                    Lihat Daftar Produk
-                </a>
-            </div>
+<div class="container-tailwind max-w-7xl mx-auto px-4">
+    <div class="flex justify-center mt-20">
+        <div class="max-w-3xl text-center">
+            <h1 class="text-5xl font-bold text-gray-800 mb-6">Selamat Datang di Product CRUD</h1>
+            <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                Aplikasi manajemen produk sederhana untuk praktikum JPA Fundamentals.
+                Saat ini data disimpan di dalam memori (ArrayList). Pada praktikum berikutnya,
+                Anda akan menambahkan JPA untuk menyimpan data ke database.
+            </p>
+            <a th:href="@{/products}"
+               class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg">
+                Lihat Daftar Produk
+            </a>
         </div>
     </div>
+</div>
 
-    <footer th:replace="~{fragments/layout :: footer}"></footer>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>
