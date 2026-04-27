@@ -1,11 +1,18 @@
+/*
+ * File CSS utama untuk styling dasar
+ * Sebagian besar styling sudah diambil alih oleh Tailwind CSS,
+ * file ini hanya berisi styling yang memang perlu ditulis manual.
+ */
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f8f9fa;
-    min-height: 100vh;
+    min-height: 100vh;           /* Minimal tinggi layar penuh */
     display: flex;
-    flex-direction: column;
+    flex-direction: column;      /* Layout vertikal supaya footer selalu di bawah */
 }
 
+/* Wrapper utama yang mengisi sisa ruang antara navbar dan footer */
 .container-tailwind {
     flex: 1;
 }

@@ -7,18 +7,32 @@
 <div class="container-tailwind max-w-7xl mx-auto px-4 mt-8">
     <div class="flex justify-center">
         <div class="w-full max-w-3xl">
+            <!-- Kartu profil user -->
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- Header kartu berwarna biru -->
                 <div class="bg-blue-600 text-white text-center px-6 py-5">
                     <h3 class="text-xl font-bold">Profil Gua Nih</h3>
                 </div>
                 <div class="p-8 text-center">
+                    <!--
+                      Gambar profil: menggunakan URL dari user jika ada,
+                      fallback ke placeholder jika tidak diisi.
+                      Styling: bulat (rounded-full), ukuran tetap 150x150px, dengan border putih.
+                    -->
                     <img th:src="${currentUser.profileImageUrl ?: 'https://via.placeholder.com/150'}"
                          class="rounded-full mx-auto mb-4 shadow-md border-4 border-white"
                          alt="Profile Image"
                          style="width: 150px; height: 150px; object-fit: cover;">
 
+                    <!-- Nama tampil: pakai fullName jika ada, fallback ke username -->
                     <h4 class="text-xl font-bold text-gray-800 mb-6" th:text="${currentUser.fullName ?: currentUser.username}">Nama User</h4>
 
+                    <!--
+                      Grid informasi profil.
+                      Layout 2 kolom di layar kecil ke atas (sm:grid-cols-2).
+                      Kolom kiri = label, kolom kanan = nilai.
+                      Menggunakan ?: (Elvis operator) untuk menampilkan "-" jika data kosong.
+                    -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 text-left gap-y-4 gap-x-6 max-w-lg mx-auto">
                         <div class="font-semibold text-gray-700">Username:</div>
                         <div class="text-gray-600" th:text="${currentUser.username}">-</div>
@@ -36,9 +50,13 @@
                         <div class="text-gray-600" th:text="${currentUser.bio ?: '-'}">-</div>
                     </div>
 
+                    <!-- Tombol aksi profil -->
                     <div class="flex flex-wrap justify-center gap-3 mt-8">
+                        <!-- Tombol edit profil (kuning) -->
                         <a th:href="@{/profile/edit}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-6 py-2.5 rounded-lg transition-colors duration-200">Edit Profil</a>
+                        <!-- Tombol ganti password (cyan) -->
                         <a th:href="@{/profile/change-password}" class="bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-6 py-2.5 rounded-lg transition-colors duration-200">Ganti Password</a>
+                        <!-- Tombol kembali ke daftar produk (abu-abu) -->
                         <a th:href="@{/products}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium px-6 py-2.5 rounded-lg transition-colors duration-200">Kembali ke Produk</a>
                     </div>
                 </div>

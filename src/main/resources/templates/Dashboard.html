@@ -5,54 +5,81 @@
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
 <div class="container-tailwind max-w-7xl mx-auto px-4 mt-6">
+    <!-- Judul halaman dashboard -->
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Dashboard</h2>
 
-    <!-- Pesan ajakan jika belum ada produk -->
+    <!--
+      Pesan ajakan yang tampil JIKA belum ada produk sama sekali.
+      Bertujuan untuk mengarahkan user menambahkan produk pertama.
+    -->
     <div th:if="${!hasProducts}" class="bg-blue-50 border border-blue-200 text-blue-700 rounded-xl p-12 text-center">
         <div class="mb-4">
+            <!-- Ikon panah kanan dalam lingkaran -->
             <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" viewBox="0 0 16 16" class="text-blue-300 mx-auto">
                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
             </svg>
         </div>
         <h4 class="text-xl font-semibold mb-2">📦 Belum ada produk</h4>
         <p class="mb-4 text-blue-500">Mulai tambahkan produk pertama Anda untuk melihat statistik di dashboard!</p>
+        <!-- Tombol untuk langsung ke form tambah produk -->
         <a th:href="@{/products/new}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 rounded-lg font-medium transition-colors duration-200">+ Tambah Produk Pertama</a>
     </div>
 
-    <!-- Dashboard Cards -->
+    <!--
+      Konten dashboard yang tampil JIKA sudah ada produk.
+      Terdiri dari 3 baris: ringkasan nilai, status aktif, dan tabel detail.
+    -->
     <div th:if="${hasProducts}">
-        <!-- Row 1 -->
+
+        <!--
+          BARIS 1: Kartu ringkasan - Total Produk & Total Nilai Inventory
+          Menggunakan grid 2 kolom di layar medium ke atas, 1 kolom di mobile.
+        -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Kartu Total Produk (warna biru) -->
             <div class="bg-blue-600 text-white rounded-xl p-6 shadow-md">
                 <h6 class="text-blue-100 text-sm font-medium mb-1">Total Produk</h6>
                 <h2 class="text-3xl font-bold" th:text="${totalProducts}">0</h2>
             </div>
+            <!-- Kartu Total Nilai Inventory (warna hijau) -->
             <div class="bg-green-600 text-white rounded-xl p-6 shadow-md">
                 <h6 class="text-green-100 text-sm font-medium mb-1">Total Nilai Inventory</h6>
+                <!-- Format angka dengan pemisah ribuan menggunakan titik -->
                 <h2 class="text-3xl font-bold" th:text="${'Rp ' + #numbers.formatDecimal(totalInventoryValue, 0, 'POINT', 0, 'COMMA')}">Rp 0</h2>
             </div>
         </div>
 
-        <!-- Row 2 -->
+        <!--
+          BARIS 2: Kartu status - Produk Aktif vs Tidak Aktif
+          Menggunakan border berwarna sebagai penanda (tanpa background penuh).
+        -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Kartu Produk Aktif (border hijau, angka hijau) -->
             <div class="bg-white border-2 border-green-200 rounded-xl p-6 shadow-sm">
                 <h6 class="text-gray-500 text-sm font-medium mb-1">Produk Aktif</h6>
                 <h2 class="text-3xl font-bold text-green-600" th:text="${activeProducts}">0</h2>
             </div>
+            <!-- Kartu Produk Tidak Aktif (border merah, angka merah) -->
             <div class="bg-white border-2 border-red-200 rounded-xl p-6 shadow-sm">
                 <h6 class="text-gray-500 text-sm font-medium mb-1">Produk Tidak Aktif</h6>
                 <h2 class="text-3xl font-bold text-red-600" th:text="${inactiveProducts}">0</h2>
             </div>
         </div>
 
-        <!-- Row 3 -->
+        <!--
+          BARIS 3: Dua tabel - Produk per Kategori & Daftar Low Stock
+          Masing-masing dalam kartu terpisah.
+        -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Produk per Kategori -->
+
+            <!-- Tabel: Jumlah Produk per Kategori -->
             <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <!-- Header kartu berwarna gelap -->
                 <div class="bg-gray-800 text-white px-6 py-4">
                     <h5 class="font-bold text-lg">📁 Jumlah Produk per Kategori</h5>
                 </div>
                 <div class="p-0">
+                    <!-- Tabel hanya ditampilkan jika ada data kategori -->
                     <table class="w-full" th:if="${!#lists.isEmpty(productsPerCategory)}">
                         <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
@@ -61,26 +88,31 @@
                         </tr>
                         </thead>
                         <tbody>
+                        <!-- Looping data kategori: item[0] = nama, item[1] = jumlah -->
                         <tr th:each="item : ${productsPerCategory}" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-3" th:text="${item[0]}">Nama Kategori</td>
                             <td class="px-6 py-3 text-center">
+                                <!-- Badge berwarna biru untuk menampilkan jumlah -->
                                 <span class="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-base font-semibold" th:text="${item[1]}">0</span>
                             </td>
                         </tr>
                         </tbody>
                     </table>
+                    <!-- Pesan jika belum ada data kategori -->
                     <div th:if="${#lists.isEmpty(productsPerCategory)}" class="text-center text-gray-500 py-8">
                         <p>Belum ada data kategori</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Low Stock -->
+            <!-- Tabel: Daftar Produk dengan Stok Rendah (di bawah 5) -->
             <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <!-- Header kartu berwarna kuning sebagai peringatan -->
                 <div class="bg-yellow-500 text-gray-900 px-6 py-4">
                     <h5 class="font-bold text-lg">⚠️ Daftar Low Stock (stok &lt; 5)</h5>
                 </div>
                 <div class="p-0">
+                    <!-- Tabel hanya ditampilkan jika ada produk low stock -->
                     <table class="w-full" th:if="${!#lists.isEmpty(lowStockProducts)}">
                         <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
@@ -89,16 +121,20 @@
                         </tr>
                         </thead>
                         <tbody>
+                        <!-- Looping produk low stock -->
                         <tr th:each="product : ${lowStockProducts}" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <!-- Nama produk berupa link ke halaman detail -->
                             <td class="px-6 py-3">
                                 <a th:href="@{/products/{id}(id=${product.id})}" class="text-blue-600 hover:text-blue-800 hover:underline transition-colors" th:text="${product.name}">Nama Produk</a>
                             </td>
                             <td class="px-6 py-3 text-center">
+                                <!-- Badge berwarna merah untuk menandai stok rendah -->
                                 <span class="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-full text-base font-semibold" th:text="${product.stock}">0</span>
                             </td>
                         </tr>
                         </tbody>
                     </table>
+                    <!-- Pesan jika semua produk stoknya aman -->
                     <div th:if="${#lists.isEmpty(lowStockProducts)}" class="text-center text-gray-500 py-8">
                         <p>✅ Semua produk memiliki stok yang cukup</p>
                     </div>

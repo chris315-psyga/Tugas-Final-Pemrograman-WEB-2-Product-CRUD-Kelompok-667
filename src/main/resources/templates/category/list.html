@@ -5,6 +5,7 @@
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
 <div class="container-tailwind max-w-7xl mx-auto px-4">
+    <!-- Baris atas: judul halaman + tombol tambah kategori baru -->
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Daftar Kategori Saya</h2>
         <a th:href="@{/categories/new}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-lg transition-colors duration-200">
@@ -17,8 +18,10 @@
         <button onclick="document.getElementById('successAlert').remove()" class="text-green-500 hover:text-green-700 font-bold text-lg leading-none">&times;</button>
     </div>
 
+    <!-- Tabel kategori - hanya ditampilkan jika list tidak kosong -->
     <div th:if="${!#lists.isEmpty(categories)}" class="bg-white rounded-xl shadow-md overflow-hidden">
         <table class="w-full">
+            <!-- Header tabel dengan latar gelap -->
             <thead>
             <tr class="bg-gray-800 text-white">
                 <th class="px-6 py-3 text-left text-sm font-semibold">No</th>
@@ -28,13 +31,24 @@
             </tr>
             </thead>
             <tbody>
+            <!--
+              Looping setiap kategori.
+              iterStat.index digunakan untuk nomor urut (dimulai dari 0, ditambah 1).
+            -->
             <tr th:each="category, iterStat : ${categories}" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <!-- Nomor urut otomatis -->
                 <td class="px-6 py-3" th:text="${iterStat.index + 1}">1</td>
                 <td class="px-6 py-3" th:text="${category.name}">Nama Kategori</td>
                 <td class="px-6 py-3" th:text="${category.description}">Deskripsi</td>
                 <td class="px-6 py-3">
+                    <!-- Tombol edit (warna kuning) -->
                     <div class="flex gap-2">
                         <a th:href="@{/categories/{id}/edit(id=${category.id})}" class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-3 py-1.5 rounded-lg transition-colors">Edit</a>
+                        <!--
+                          Tombol hapus dengan konfirmasi.
+                          Menggunakan form POST untuk keamanan (bukan link GET).
+                          produk dengan kategori ini mungkin akan error jika kategori dihapus.
+                        -->
                         <form th:action="@{/categories/{id}/delete(id=${category.id})}" method="post" style="display:inline;"
                               onsubmit="return confirm('Yakin ingin menghapus kategori ini? Produk dengan kategori ini mungkin akan error.');">
                             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1.5 rounded-lg transition-colors">Hapus</button>
@@ -46,6 +60,7 @@
         </table>
     </div>
 
+    <!-- Kalimat kalau masih belum ada kategori sama sekali -->
     <div th:if="${#lists.isEmpty(categories)}" class="text-center py-16">
         <p class="text-gray-500 text-lg">Belum ada kategori.</p>
     </div>

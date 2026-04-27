@@ -1,39 +1,70 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
+<!--============================================================
+  FRAGMENT: Header
+  Digunakan sebagai bagian <head> yang bisa di-reuse di semua halaman.
+  Berisi meta tag, judul halaman, dan link Tailwind CSS.
+  ============================================================-->
+
 <head th:fragment="header">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product CRUD</title>
+    <!-- Memuat Tailwind CSS melalui CDN (menggantikan Bootstrap 5) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- File CSS kustom untuk styling yang tidak bisa di-cover Tailwind -->
     <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
 
+<!--
+  ============================================================
+  FRAGMENT: Navbar (Navigasi Utama)
+  - Warna gelap (bg-gray-900) dengan teks putih
+  - Responsive: hamburger menu di mobile, menu horizontal di desktop
+  - Dropdown profil user (hanya tampil jika sudah login)
+  - Menggunakan xmlns:sec untuk integrasi Spring Security
+  ============================================================
+-->
 <nav th:fragment="navbar" class="bg-gray-900 mb-4 shadow-lg"
      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <div class="max-w-7xl mx-auto px-4">
+        <!-- Baris atas: logo & tombol hamburger -->
         <div class="flex items-center justify-between h-16">
+            <!-- Logo / nama aplikasi -->
             <a class="text-white font-bold text-xl tracking-wide" th:href="@{/}">Product CRUD</a>
+
+            <!-- Tombol hamburger - hanya tampil di layar mobile (md:hidden) -->
             <button class="text-white md:hidden" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
             </button>
+
+            <!-- Menu desktop - tersembunyi di mobile (hidden md:flex) -->
             <div class="hidden md:flex items-center gap-6">
+                <!-- Link navigasi utama -->
                 <a class="text-gray-300 hover:text-white transition-colors" th:href="@{/}">Home</a>
                 <a class="text-gray-300 hover:text-white transition-colors" th:href="@{/products}">Products</a>
                 <a class="text-gray-300 hover:text-white transition-colors" th:href="@{/categories}">Kategori Saya</a>
+
+                <!-- Dropdown profil user - hanya tampil jika sudah login -->
                 <div sec:authorize="isAuthenticated()" class="relative">
+                    <!-- Tombol yang menampilkan nama user + ikon panah -->
                     <button onclick="document.getElementById('userDropdown').classList.toggle('hidden')"
                             class="text-gray-300 hover:text-white border border-gray-600 hover:border-gray-400 px-3 py-1.5 rounded-lg flex items-center gap-2 transition-colors">
                         Halo, <strong th:text="${#authentication.name}">User</strong>
+                        <!-- Ikon panah bawah -->
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
+
+                    <!-- Menu dropdown (hidden secara default, di-toggle via JS) -->
                     <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl z-50 border border-gray-700">
                         <a th:href="@{/profile}" class="block px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white rounded-t-lg transition-colors">Profile Saya</a>
                         <hr class="border-gray-700">
+                        <!-- Form logout menggunakan method POST (standar keamanan Spring Security) -->
                         <form th:action="@{/logout}" method="post" class="m-0">
                             <button type="submit" class="block w-full text-left px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white rounded-b-lg transition-colors">Logout</button>
                         </form>
@@ -41,10 +72,14 @@
                 </div>
             </div>
         </div>
+
+        <!-- Menu mobile - tampil saat tombol hamburger diklik (hidden md:hidden berarti tersembunyi di desktop) -->
         <div id="mobileMenu" class="hidden md:hidden pb-4 space-y-1">
             <a class="block py-2 px-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded transition-colors" th:href="@{/}">Home</a>
             <a class="block py-2 px-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded transition-colors" th:href="@{/products}">Products</a>
             <a class="block py-2 px-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded transition-colors" th:href="@{/categories}">Kategori Saya</a>
+
+            <!-- Menu user di mobile (hanya jika sudah login) -->
             <div sec:authorize="isAuthenticated()" class="pt-2 border-t border-gray-700">
                 <a th:href="@{/profile}" class="block py-2 px-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded transition-colors">Profile Saya</a>
                 <form th:action="@{/logout}" method="post" class="m-0">
@@ -55,11 +90,19 @@
     </div>
 </nav>
 
+<!--
+  ============================================================
+  Footer
+  Ditampilkan di bagian paling bawah setiap halaman.
+  Tidak perlu script JS Bootstrap lagi karena sudah pakai Tailwind.
+  ============================================================
+-->
 <footer th:fragment="footer">
     <div class="max-w-7xl mx-auto px-4">
         <hr class="border-gray-300">
         <p class="text-center text-gray-500 py-3">Product CRUD - Praktikum JPA Fundamentals - 2026</p>
     </div>
+    <!-- Catatan: bootstrap.bundle.min.js sudah TIDAK diperlukan lagi -->
 </footer>
 
 </html>

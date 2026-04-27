@@ -6,24 +6,31 @@
 
 <div class="container-tailwind max-w-7xl mx-auto px-4">
     <div class="flex justify-center">
+        <!-- Form dibatasi lebar maksimal 3 kolom agar nyaman dibaca -->
         <div class="w-full max-w-3xl">
+            <!-- Judul dinamis: "Edit Kategori" jika ID ada, "Tambah Kategori Baru" jika tidak -->
             <h2 th:text="${category.id != null} ? 'Edit Kategori' : 'Tambah Kategori Baru'" class="text-2xl font-bold text-gray-800 mb-6">Form Kategori</h2>
 
+            <!-- Form yang dikirim ke endpoint /categories/save -->
             <form th:action="@{/categories/save}" th:object="${category}" method="post" class="space-y-5">
+                <!-- Hidden field untuk ID (digunakan saat edit, kosong saat tambah baru) -->
                 <input type="hidden" th:field="*{id}">
 
+                <!-- Input nama kategori -->
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama Kategori</label>
                     <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="name" th:field="*{name}"
                            placeholder="Misal: Elektronik, Pakaian" required autofocus>
                 </div>
 
+                <!-- Input deskripsi kategori (opsional) -->
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                     <textarea class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="description" th:field="*{description}"
                               rows="3" placeholder="Berikan deskripsi singkat..."></textarea>
                 </div>
 
+                <!-- Tombol aksi: Simpan dan Batal -->
                 <div class="flex gap-3">
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-2.5 rounded-lg transition-colors duration-200">Simpan Kategori</button>
                     <a th:href="@{/categories}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium px-6 py-2.5 rounded-lg transition-colors duration-200">Batal</a>

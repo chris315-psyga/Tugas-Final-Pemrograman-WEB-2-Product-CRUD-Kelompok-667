@@ -7,10 +7,16 @@
 <div class="container-tailwind max-w-7xl mx-auto px-4">
     <div class="flex justify-center">
         <div class="w-full max-w-3xl">
+            <!-- Judul halaman = nama produk -->
             <h2 th:text="${product.name}" class="text-2xl font-bold text-gray-800 mb-6">Nama Produk</h2>
 
+            <!-- Kartu detail produk -->
             <div class="bg-white rounded-xl shadow-md overflow-hidden">
                 <div class="p-6">
+                    <!--
+                      Tabel tanpa border luar untuk menampilkan detail.
+                      Setiap baris adalah pasangan label (th) dan nilai (td).
+                    -->
                     <table class="w-full">
                         <tr class="border-b border-gray-100">
                             <th class="text-gray-500 text-left py-3 pr-4 font-medium" style="width: 200px;">Nama</th>
@@ -18,10 +24,12 @@
                         </tr>
                         <tr class="border-b border-gray-100">
                             <th class="text-gray-500 text-left py-3 pr-4 font-medium">Kategori</th>
+                            <!-- Menggunakan safe navigation (?.) untuk menghindari error jika kategori null -->
                             <td class="py-3" th:text="${product.category?.name}">-</td>
                         </tr>
                         <tr class="border-b border-gray-100">
                             <th class="text-gray-500 text-left py-3 pr-4 font-medium">Harga</th>
+                            <!-- Format harga dengan pemisah ribuan -->
                             <td class="py-3" th:text="${'Rp ' + #numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA')}">Rp 0</td>
                         </tr>
                         <tr class="border-b border-gray-100">
@@ -35,6 +43,7 @@
                         <tr class="border-b border-gray-100">
                             <th class="text-gray-500 text-left py-3 pr-4 font-medium">Status</th>
                             <td class="py-3">
+                                <!-- Badge status: hijau jika aktif, merah jika tidak aktif -->
                                 <span th:if="${product.active}" class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">Aktif</span>
                                 <span th:unless="${product.active}" class="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">Tidak Aktif</span>
                             </td>
@@ -47,6 +56,7 @@
                 </div>
             </div>
 
+            <!-- Tombol aksi di bawah kartu detail -->
             <div class="flex gap-3 mt-6">
                 <a th:href="@{/products/{id}/edit(id=${product.id})}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-6 py-2.5 rounded-lg transition-colors duration-200">Edit</a>
                 <a th:href="@{/products}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium px-6 py-2.5 rounded-lg transition-colors duration-200">Kembali ke Daftar</a>

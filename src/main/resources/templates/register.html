@@ -14,37 +14,52 @@
             <div class="bg-white rounded-xl shadow-lg p-8">
                 <h3 class="text-2xl font-bold text-center text-gray-800 mb-6">Register</h3>
 
+                <!--
+                  Alert error: tampil jika ada attribute "error" dari controller.
+                  Misalnya username sudah terdaftar, atau password tidak cocok.
+                -->
                 <div th:if="${error}" class="bg-red-100 text-red-700 border border-red-200 px-4 py-3 rounded-lg mb-4" th:text="${error}"></div>
 
+                <!--
+                  Form registrasi - menggunakan th:object untuk binding ke RegisterRequest.
+                  Data dikirim ke endpoint /register dengan method POST.
+                -->
                 <form th:action="@{/register}" th:object="${registerRequest}" method="post" class="space-y-4">
+                    <!-- Input username -->
                     <div>
                         <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
                         <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="username"
                                th:field="*{username}" placeholder="Masukkan username" required autofocus>
                     </div>
+                    <!-- Input nama lengkap -->
                     <div>
                         <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
                         <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="fullName"
                                th:field="*{fullName}" placeholder="Masukkan nama lengkap" required>
                     </div>
+                    <!-- Input email (opsional) -->
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                         <input type="email" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="email"
                                th:field="*{email}" placeholder="contoh@email.com">
                     </div>
+                    <!-- Input password -->
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                         <input type="password" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="password"
                                th:field="*{password}" placeholder="Masukkan password" required>
                     </div>
+                    <!-- Input konfirmasi password -->
                     <div>
                         <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password</label>
                         <input type="password" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="confirmPassword"
                                th:field="*{confirmPassword}" placeholder="Ulangi password" required>
                     </div>
+                    <!-- Tombol submit registrasi (warna hijau) -->
                     <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 rounded-lg transition-colors duration-200">Daftar</button>
                 </form>
 
+                <!-- Link ke halaman login -->
                 <div class="text-center mt-5 text-gray-600">
                     <span>Sudah punya akun? </span>
                     <a th:href="@{/login}" class="text-blue-600 hover:text-blue-800 hover:underline font-medium">Login di sini</a>

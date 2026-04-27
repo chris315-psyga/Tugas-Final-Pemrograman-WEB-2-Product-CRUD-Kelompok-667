@@ -7,48 +7,63 @@
 <div class="container-tailwind max-w-7xl mx-auto px-4 mt-8">
     <div class="flex justify-center">
         <div class="w-full max-w-3xl">
+            <!-- Kartu form edit profil -->
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- Header kartu berwarna kuning -->
                 <div class="bg-yellow-500 text-gray-900 px-6 py-4">
                     <h4 class="text-lg font-bold">Edit Profil</h4>
                 </div>
                 <div class="p-6">
+                    <!--
+                      Form edit profil - dikirim ke endpoint /profile/update.
+                      Menggunakan th:object untuk binding ke objek User.
+                    -->
                     <form th:action="@{/profile/update}" th:object="${currentUser}" method="post" class="space-y-5">
 
+                        <!-- Hidden fields: ID dan Username tidak boleh diubah -->
                         <input type="hidden" th:field="*{id}">
                         <input type="hidden" th:field="*{username}">
 
+                        <!-- Input nama lengkap -->
                         <div>
                             <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
                             <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="fullName" th:field="*{fullName}" required>
                         </div>
 
+                        <!-- Input email -->
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                             <input type="email" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="email" th:field="*{email}" placeholder="contoh@email.com">
                         </div>
 
+                        <!-- Input nomor HP -->
                         <div>
                             <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-1">Nomor HP</label>
                             <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="phoneNumber" th:field="*{phoneNumber}">
                         </div>
 
+                        <!-- Input alamat -->
                         <div>
                             <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
                             <textarea class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="address" th:field="*{address}" rows="2"></textarea>
                         </div>
 
+                        <!-- Input bio singkat -->
                         <div>
                             <label for="bio" class="block text-sm font-medium text-gray-700 mb-1">Bio Singkat</label>
                             <textarea class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="bio" th:field="*{bio}" rows="3"></textarea>
                         </div>
 
+                        <!-- Input URL gambar profil -->
                         <div>
                             <label for="profileImageUrl" class="block text-sm font-medium text-gray-700 mb-1">URL Gambar Profil</label>
                             <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="profileImageUrl" th:field="*{profileImageUrl}"
                                    placeholder="https://...">
+                            <!-- Petunjuk: cara mendapatkan URL gambar -->
                             <small class="text-gray-500">Masukkan URL gambar (misalnya link dari Google Images)</small>
                         </div>
 
+                        <!-- Tombol aksi -->
                         <div class="flex gap-3">
                             <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-2.5 rounded-lg transition-colors duration-200">Simpan Perubahan</button>
                             <a th:href="@{/profile}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium px-6 py-2.5 rounded-lg transition-colors duration-200">Batal</a>

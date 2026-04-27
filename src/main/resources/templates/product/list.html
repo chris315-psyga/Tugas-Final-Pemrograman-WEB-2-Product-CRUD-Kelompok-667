@@ -5,6 +5,7 @@
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
 <div class="container-tailwind max-w-7xl mx-auto px-4">
+    <!-- Baris atas: judul halaman + tombol tambah produk baru -->
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Daftar Produk</h2>
         <a th:href="@{/products/new}" class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2.5 rounded-lg transition-colors duration-200">
@@ -12,43 +13,68 @@
         </a>
     </div>
 
+    <!--
+      Notifikasi sukses: tampil setelah tambah/edit/hapus produk.
+      Ditutup manual dengan klik tombol × (menghapus elemen dari DOM).
+    -->
     <div th:if="${successMessage}" id="successAlert" class="bg-green-100 text-green-700 border border-green-200 px-4 py-3 rounded-lg mb-4 flex justify-between items-center">
         <span th:text="${successMessage}"></span>
         <button onclick="document.getElementById('successAlert').remove()" class="text-green-500 hover:text-green-700 font-bold text-lg leading-none">&times;</button>
     </div>
 
-    <!-- SEARCH & FILTER -->
+    <!--
+      ============================================================
+      FORM PENCARIAN & FILTER
+      - Keyword: mencari berdasarkan nama produk
+      - Kategori: memfilter berdasarkan kategori tertentu
+      - Method GET agar hasil bisa di-bookmark / dibagikan
+      - Layout grid: 5 kolom + 5 kolom + 2 kolom di desktop
+      ============================================================
+    -->
     <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
         <form th:action="@{/products}" method="get" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            <!-- Input pencarian berdasarkan nama -->
             <div class="md:col-span-5">
                 <label for="keyword" class="block text-sm font-bold text-gray-700 mb-1">🔍 Cari Produk</label>
                 <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="keyword" name="keyword" th:value="${keyword}" placeholder="Ketik nama produk...">
             </div>
+            <!-- Dropdown filter kategori -->
             <div class="md:col-span-5">
                 <label for="category" class="block text-sm font-bold text-gray-700 mb-1">📁 Filter Kategori</label>
                 <select class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white" id="category" name="categoryId">
                     <option value="">-- Semua Kategori --</option>
+                    <!-- Looping kategori, option yang aktif di-selected berdasarkan filter saat ini -->
                     <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}" th:selected="${categoryId != null and cat.id == categoryId}"></option>
                 </select>
             </div>
+            <!-- Tombol cari dan reset -->
             <div class="md:col-span-2 flex flex-col gap-2">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors">🔍 Cari</button>
+                <!-- Tombol reset: menghapus semua parameter filter (kembali ke halaman /products murni) -->
                 <a th:href="@{/products}" class="text-center border border-gray-300 hover:bg-gray-100 text-gray-600 text-sm px-3 py-1.5 rounded-lg transition-colors">↺ Reset</a>
             </div>
         </form>
     </div>
 
-    <!-- INFO TOTAL -->
+    <!-- Info jumlah data yang ditampilkan (misal: "Showing 1 to 10 of 25 entries") -->
     <div class="flex justify-between items-center mb-3">
         <p class="text-gray-500">
             Showing <strong class="text-gray-700" th:text="${startItem}">1</strong> to <strong class="text-gray-700" th:text="${endItem}">10</strong> of <strong class="text-gray-700" th:text="${totalItems}">0</strong> entries
         </p>
     </div>
 
-    <!-- TABLE -->
+    <!--
+      ============================================================
+      TABEL DAFTAR PRODUK
+      - Hanya ditampilkan jika list produk tidak kosong
+      - overflow-x-auto untuk scroll horizontal di layar kecil
+      - even:bg-gray-50/50 untuk warna baris genap (alternating)
+      ============================================================
+    -->
     <div th:if="${!#lists.isEmpty(products)}" class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
+                <!-- Header tabel -->
                 <thead>
                 <tr class="bg-gray-800 text-white">
                     <th class="px-6 py-3 text-left text-sm font-semibold">No</th>
@@ -61,19 +87,29 @@
                 </tr>
                 </thead>
                 <tbody>
+                <!--
+                  Looping produk.
+                  Nomor urut dihitung berdasarkan halaman saat ini:
+                  (currentPage * 10) + index + 1
+                -->
                 <tr th:each="product, iterStat : ${products}" class="border-b border-gray-100 hover:bg-gray-50 transition-colors even:bg-gray-50/50">
                     <td class="px-6 py-3" th:text="${currentPage * 10 + iterStat.index + 1}">1</td>
                     <td class="px-6 py-3" th:text="${product.name}">Nama Produk</td>
+                    <!-- Safe navigation (?.) untuk kategori yang mungkin null -->
                     <td class="px-6 py-3" th:text="${product.category?.name}">Kategori</td>
+                    <!-- Harga diformat dengan pemisah ribuan -->
                     <td class="px-6 py-3" th:text="${'Rp ' + #numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA')}">Rp 0</td>
                     <td class="px-6 py-3" th:text="${product.stock}">0</td>
                     <td class="px-6 py-3">
+                        <!-- Badge status aktif/tidak aktif -->
                         <span th:if="${product.active}" class="inline-block bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full text-sm font-medium">Aktif</span>
                         <span th:unless="${product.active}" class="inline-block bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full text-sm font-medium">Tidak Aktif</span>
                     </td>
                     <td class="px-6 py-3">
+                        <!-- Tombol edit dan hapus -->
                         <div class="flex gap-2">
                             <a th:href="@{/products/{id}/edit(id=${product.id})}" class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-3 py-1.5 rounded-lg transition-colors">Edit</a>
+                            <!-- Form hapus dengan konfirmasi dialog -->
                             <form th:action="@{/products/{id}/delete(id=${product.id})}" method="post" style="display:inline;" onsubmit="return confirm('Yakin hapus?');">
                                 <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1.5 rounded-lg transition-colors">Hapus</button>
                             </form>
@@ -84,20 +120,31 @@
             </table>
         </div>
 
-        <!-- PAGINATION -->
+        <!--
+          ============================================================
+          KONTROL PAGINASI
+          - Tombol Previous (nonaktif di halaman pertama)
+          - Daftar nomor halaman (halaman aktif diberi warna biru)
+          - Tombol Next (nonaktif di halaman terakhir)
+          - Semua link membawa parameter keyword dan categoryId agar filter tetap aktif
+          ============================================================
+        -->
         <nav class="flex justify-center px-6 py-4 border-t border-gray-100">
             <ul class="flex items-center gap-1">
+                <!-- Tombol Previous -->
                 <li>
                     <a th:href="@{/products(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId})}"
                        th:classappend="${currentPage == 0} ? 'opacity-40 pointer-events-none' : 'hover:bg-gray-100 text-gray-700'"
                        class="px-3 py-2 rounded-lg text-sm font-medium text-gray-500 transition-colors">Previous</a>
                 </li>
+                <!-- Nomor halaman: dari 0 sampai totalPages - 1 -->
                 <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
                     <a th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId})}"
                        th:text="${i + 1}"
                        th:classappend="${i == currentPage} ? 'bg-blue-600 text-white' : 'hover:bg-gray-100 text-gray-700'"
                        class="px-3 py-2 rounded-lg text-sm font-medium transition-colors">1</a>
                 </li>
+                <!-- Tombol Next -->
                 <li>
                     <a th:href="@{/products(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId})}"
                        th:classappend="${currentPage == totalPages - 1} ? 'opacity-40 pointer-events-none' : 'hover:bg-gray-100 text-gray-700'"
@@ -107,7 +154,7 @@
         </nav>
     </div>
 
-    <!-- EMPTY STATE -->
+    <!-- Pesan yang tampil jika tidak ada produk yang cocok dengan pencarian/filter -->
     <div th:if="${#lists.isEmpty(products)}" class="text-center py-16">
         <p class="text-gray-500 text-lg mb-3">📦 Tidak ada produk ditemukan</p>
         <a th:href="@{/products/new}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg transition-colors duration-200">+ Tambah Produk Pertama</a>

@@ -7,54 +7,72 @@
 <div class="container-tailwind max-w-7xl mx-auto px-4">
     <div class="flex justify-center">
         <div class="w-full max-w-3xl">
+            <!-- Judul dinamis berdasarkan mode: edit atau tambah baru -->
             <h2 th:text="${product.id != null} ? 'Edit Produk' : 'Tambah Produk Baru'" class="text-2xl font-bold text-gray-800 mb-6">Form Produk</h2>
 
+            <!-- Form produk - dikirim ke endpoint /products/save -->
             <form th:action="@{/products/save}" th:object="${product}" method="post" class="space-y-5">
+
+                <!-- Hidden ID field: kosong saat tambah baru, berisi ID saat edit -->
                 <input type="hidden" th:field="*{id}">
 
+                <!-- Input nama produk -->
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama Produk</label>
                     <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="name" th:field="*{name}"
                            placeholder="Masukkan nama produk" required>
                 </div>
 
+                <!-- Dropdown pemilihan kategori -->
                 <div>
                     <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
                     <select class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white" id="category" th:field="*{category}" required>
                         <option value="">-- Pilih Kategori --</option>
+                        <!-- Looping daftar kategori dari controller -->
                         <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Kategori</option>
                     </select>
                 </div>
 
+                <!--
+                  Input harga dengan format otomatis.
+                  Ada 2 input: hidden (menyimpan nilai mentah) dan text (menampilkan format ribuan).
+                -->
                 <div>
                     <label for="priceDisplay" class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+                    <!-- Hidden: menyimpan angka murni tanpa format (dikirim ke server) -->
                     <input type="hidden" th:field="*{price}">
+                    <!-- Visible: menampilkan angka dengan pemisah ribuan (titik) -->
                     <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="priceDisplay"
                            placeholder="Masukkan harga produk" required>
                 </div>
 
+                <!-- Input stok (hanya angka, minimal 0) -->
                 <div>
                     <label for="stock" class="block text-sm font-medium text-gray-700 mb-1">Stok</label>
                     <input type="number" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="stock" th:field="*{stock}"
                            min="0" placeholder="Masukkan jumlah stok" required>
                 </div>
 
+                <!-- Input deskripsi produk (opsional) -->
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                     <textarea class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="description" th:field="*{description}"
                               rows="3" placeholder="Masukkan deskripsi produk"></textarea>
                 </div>
 
+                <!-- Checkbox status aktif/tidak aktif -->
                 <div class="flex items-center gap-3">
                     <input type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" id="active" th:field="*{active}">
                     <label class="text-sm font-medium text-gray-700" for="active">Produk Aktif</label>
                 </div>
 
+                <!-- Input tanggal dibuat -->
                 <div>
                     <label for="createdAt" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Dibuat</label>
                     <input type="date" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" id="createdAt" th:field="*{createdAt}" required>
                 </div>
 
+                <!-- Tombol aksi -->
                 <div class="flex gap-3">
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg transition-colors duration-200">Simpan Produk</button>
                     <a th:href="@{/products}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium px-6 py-2.5 rounded-lg transition-colors duration-200">Batal</a>
@@ -66,28 +84,45 @@
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 
+<!--
+  ============================================================
+  SCRIPT: Format otomatis input harga
+  - Mengubah angka mentah menjadi format ribuan Indonesia (1.000.000)
+  - Menyinkronkan input visible (priceDisplay) dengan hidden (price)
+  - Menjaga posisi cursor saat mengetik agar tidak loncat
+  ============================================================
+-->
 <script>
+    // Referensi ke input hidden (nilai mentah) dan input visible (nilai terformat)
     const priceHidden = document.getElementById('price');
     const priceDisplay = document.getElementById('priceDisplay');
 
+    // Fungsi untuk memformat angka dengan pemisah ribuan (format Indonesia)
     function formatThousand(value) {
         return Number(value).toLocaleString('id-ID');
     }
 
+    // Saat halaman dimuat: jika ada nilai harga, format tampilannya
     if (priceHidden.value && priceHidden.value !== '0') {
         priceDisplay.value = formatThousand(priceHidden.value);
     }
 
+    // Event listener: setiap kali user mengetik di input harga
     priceDisplay.addEventListener('input', function () {
         const oldValue = this.value;
         const cursorPos = this.selectionStart;
+        // Hitung jumlah titik sebelum posisi cursor (untuk menjaga posisi)
         const dotsBeforeCursor = oldValue.substring(0, cursorPos).split('.').length - 1;
 
+        // Hapus semua titik dan karakter non-digit untuk mendapatkan angka murni
         const raw = oldValue.replace(/\./g, '').replace(/\D/g, '');
+        // Simpan angka murni ke input hidden (yang akan dikirim ke server)
         priceHidden.value = raw;
+        // Format angka untuk ditampilkan
         const formatted = raw ? formatThousand(raw) : '';
         this.value = formatted;
 
+        // Hitung ulang posisi cursor agar tidak loncat saat titik ditambahkan
         const digitPos = cursorPos - dotsBeforeCursor;
         const newDotsBeforeCursor = formatted.substring(0, digitPos + dotsBeforeCursor + 1).split('.').length - 1;
         this.setSelectionRange(digitPos + newDotsBeforeCursor, digitPos + newDotsBeforeCursor);
